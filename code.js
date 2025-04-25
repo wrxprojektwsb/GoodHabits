@@ -49,23 +49,49 @@ function formatDateString(date) {
     return `${dayName}, ${day}.${month}.${year}`;
 }
 
+// ----------- LICZENIE STREAKÓW -----------
+function calculateStreak(taskName, dateKey) {
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || {};
+    let streak = 0;
+    let currentDate = new Date(dateKey);
+
+    while(true) {
+        const key = currentDate.toISOString().split('T')[0];
+        const dayTasks = tasks[key];
+        if(dayTasks) {
+            const found = dayTasks.find(t => t.name === taskName && t.done === true && t.recurring);
+            if(found) {
+                streak++;
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+    return streak;
+}
 // ----------- WYŚWIETLANIE ZADAŃ -----------
 function showTasksForDate(dateKey) {
     const content = document.querySelector('.content');
 
     let tasks = JSON.parse(localStorage.getItem('tasks')) || {};
-    console.log("🔎 Wybrana data:", dateKey);
-    console.log("📂 Zadania w LocalStorage:", tasks);
-    console.log("📅 Zadania dla tej daty:", tasks[dateKey]);
 
     let taskListHTML = "";
 
     if(tasks[dateKey] && tasks[dateKey].length > 0) {
         taskListHTML = tasks[dateKey].map((task, index) => {
+            let icons = "";
+            if(task.recurring) {
+                icons += " ♾️";
+                icons += ` 🔥 ${calculateStreak(task.name, dateKey)}`;
+            }
+            const colorClass = `task-color-${(index % 5) + 1}`;
             return `
-                <li>
+                <li class="${colorClass}">
                     <input type="checkbox" data-date="${dateKey}" data-index="${index}" ${task.done ? 'checked' : ''}>
-                    ${task.name}
+                    ${task.name} ${icons}
                 </li>
             `;
         }).join("");
@@ -139,7 +165,6 @@ document.addEventListener("DOMContentLoaded", function() {
         renderCalendar(currentDate);
     });
 });
-
 // ----------- O NAS -----------
 document.getElementById('aboutLink').addEventListener('click', function(e) {
     e.preventDefault();
@@ -154,7 +179,7 @@ document.getElementById('aboutLink').addEventListener('click', function(e) {
     `;
 });
 
-// ----------- DODAJ ZADANIE (ZABEZPIECZENIE) -----------
+// ----------- DODAJ ZADANIE -----------
 document.getElementById('addTaskLink').addEventListener('click', function(e) {
     e.preventDefault();
     const content = document.querySelector('.content');
@@ -183,7 +208,7 @@ document.getElementById('addTaskLink').addEventListener('click', function(e) {
 
         let tasks = JSON.parse(localStorage.getItem('tasks')) || {};
         if(typeof tasks !== 'object' || Array.isArray(tasks)) {
-            tasks = {};  // Reset jeśli coś poszło nie tak
+            tasks = {};
         }
 
         if(!tasks[date]) tasks[date] = [];
@@ -191,13 +216,79 @@ document.getElementById('addTaskLink').addEventListener('click', function(e) {
 
         localStorage.setItem('tasks', JSON.stringify(tasks));
 
-        console.log("✅ Zadanie dodane! Aktualny LocalStorage:", tasks);
-
         showTasksForDate(date);
     });
 });
 
-// ----------- CHECKBOX -----------
+// ----------- DODAJ ZADANIE CYKLICZNE -----------
+document.getElementById('addRecurringTaskLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    const content = document.querySelector('.content');
+    const today = new Date().toISOString().split('T')[0];
+
+    content.innerHTML = `
+        <h1>Dodaj cykliczne zadanie</h1>
+        <form id="recurringTaskForm">
+            <label>Nazwa zadania:</label><br>
+            <input type="text" id="recurringTaskName" placeholder="Wpisz nazwę zadania" required><br><br>
+
+            <label>Data rozpoczęcia:</label><br>
+            <input type="date" id="startDate" value="${today}" required><br><br>
+
+            <label>Data zakończenia:</label><br>
+            <input type="date" id="endDate" value="${today}" required><br><br>
+
+            <button type="submit">Dodaj cykliczne zadanie</button>
+        </form>
+        <div id="recurringTaskMessage"></div>
+    `;
+
+    document.getElementById('recurringTaskForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const name = document.getElementById('recurringTaskName').value.trim();
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+
+        if(name === "" || start > end) {
+            document.getElementById('recurringTaskMessage').textContent = "❌ Błędne dane!";
+            return;
+        }
+
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || {};
+        if(typeof tasks !== 'object' || Array.isArray(tasks)) {
+            tasks = {};
+        }
+
+        let current = new Date(start);
+        const endDate = new Date(end);
+
+        while (current <= endDate) {
+            const dateKey = current.toISOString().split('T')[0];
+            if(!tasks[dateKey]) tasks[dateKey] = [];
+            tasks[dateKey].push({ name: name, done: false, recurring: true });
+            current.setDate(current.getDate() + 1);
+        }
+
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+
+        document.getElementById('recurringTaskMessage').textContent = "✅ Cykliczne zadanie dodane!";
+        this.reset();
+    });
+});
+
+// ----------- USUŃ WSZYSTKIE ZADANIA -----------
+document.getElementById('clearTasksLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    if(confirm("Czy na pewno chcesz usunąć wszystkie zadania?")) {
+        localStorage.removeItem('tasks');
+        alert("✅ Wszystkie zadania zostały usunięte!");
+        renderCalendar(currentDate);
+        const content = document.querySelector('.content');
+        content.innerHTML = "<h1>Wszystkie zadania zostały usunięte.</h1>";
+    }
+});
+
+// ----------- CHECKBOXY -----------
 document.addEventListener('change', function(e) {
     if(e.target.matches('#taskList input[type="checkbox"]')) {
         const date = e.target.getAttribute('data-date');

@@ -12,17 +12,38 @@ body {
 .menu a { text-decoration: none; color: #00796b; font-weight: 600; }
 .menu a.highlight { color: #d84315; font-weight: 700; }
 .menu a.highlight:hover { color: #bf360c; }
+.menu a.danger { color: #d32f2f; font-weight: 700; }
+.menu a.danger:hover { color: #b71c1c; }
 .content { width: 60%; background-color: #ffffff; padding: 40px; box-shadow: 0 0 5px rgba(0,0,0,0.05); }
 .sidebar { width: 20%; background-color: #fff3e0; padding: 20px; box-shadow: -2px 0 5px rgba(0,0,0,0.1); }
-.motivational-image { width: 100%; max-width: 600px; margin-top: 30px; border-radius: 10px; opacity: 1; transition: opacity 2s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: block; }
+.motivational-image { width: 100%; max-width: 600px; margin-top: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: block; }
 .calendar-widget, .clock-widget, .weather-widget { background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); padding: 15px; margin-bottom: 20px; text-align: center; }
 .calendar-body { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
 .calendar-body div { padding: 8px 0; background-color: #e8eaf6; border-radius: 6px; font-size: 0.9em; }
 .calendar-body .today { background-color: #3f51b5; color: white; font-weight: bold; }
 .creators-list { list-style: none; padding: 0; margin-top: 20px; }
 .creators-list li { background-color: #e0f7fa; display: inline-block; padding: 10px 20px; margin: 10px; border-radius: 8px; font-weight: 600; color: #00796b; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-form#taskForm input[type="text"], form#taskForm input[type="date"] { padding: 8px; width: 60%; border: 1px solid #ccc; border-radius: 6px; }
-form#taskForm button { padding: 10px 20px; background-color: #3f51b5; color: white; border: none; border-radius: 6px; cursor: pointer; }
-form#taskForm button:hover { background-color: #303f9f; }
+form#taskForm input[type="text"], form#taskForm input[type="date"],
+form#recurringTaskForm input[type="text"], form#recurringTaskForm input[type="date"] {
+    padding: 8px; width: 60%; border: 1px solid #ccc; border-radius: 6px;
+}
+form#taskForm button, form#recurringTaskForm button {
+    padding: 10px 20px; background-color: #3f51b5; color: white; border: none; border-radius: 6px; cursor: pointer;
+}
+form#taskForm button:hover, form#recurringTaskForm button:hover {
+    background-color: #303f9f;
+}
 #taskList { list-style: none; padding: 0; margin-top: 20px; }
-#taskList li { background-color: #fffde7; border: 1px solid #f0f0f0; padding: 10px 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: #555; }
+.task-color-1 { background-color: #FFEBEE; }
+.task-color-2 { background-color: #E3F2FD; }
+.task-color-3 { background-color: #E8F5E9; }
+.task-color-4 { background-color: #FFF3E0; }
+.task-color-5 { background-color: #F3E5F5; }
+#taskList li {
+    border: 1px solid #f0f0f0;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    color: #555;
+}
